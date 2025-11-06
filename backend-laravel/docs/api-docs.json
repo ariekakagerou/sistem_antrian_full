@@ -1,0 +1,270 @@
+{
+  "info": {
+    "title": "Sistem Antrian Rumah Sakit API",
+    "description": "Dokumentasi API untuk Sistem Antrian Rumah Sakit",
+    "version": "1.0.0",
+    "baseUrl": "http://127.0.0.1:8000/api"
+  },
+  "endpoints": {
+    "auth": {
+      "google_login": {
+        "method": "GET",
+        "url": "/auth/google",
+        "description": "Redirect ke halaman login Google",
+        "response": {
+          "success": true,
+          "user": {
+            "id": 1,
+            "name": "John Doe",
+            "email": "john.doe@example.com",
+            "role": "petugas"
+          },
+          "token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9...",
+          "token_type": "Bearer"
+        }
+      },
+      "get_user": {
+        "method": "GET",
+        "url": "/user",
+        "requires_auth": true,
+        "headers": {
+          "Accept": "application/json",
+          "Authorization": "Bearer your_token_here"
+        },
+        "response": {
+          "id": 1,
+          "name": "John Doe",
+          "email": "john.doe@example.com",
+          "role": "petugas",
+          "email_verified_at": "2023-11-04T13:00:00.000000Z"
+        }
+      },
+      "logout": {
+        "method": "POST",
+        "url": "/logout",
+        "requires_auth": true,
+        "headers": {
+          "Accept": "application/json",
+          "Authorization": "Bearer your_token_here"
+        },
+        "response": {
+          "success": true,
+          "message": "Berhasil logout"
+        }
+      }
+    },
+    "loket": {
+      "get_all": {
+        "method": "GET",
+        "url": "/loket",
+        "description": "Mendapatkan daftar semua loket",
+        "response": {
+          "success": true,
+          "data": [
+            {
+              "id": 1,
+              "nama_loket": "Loket Pendaftaran 1",
+              "keterangan": "Loket untuk pendaftaran pasien umum",
+              "status": "aktif"
+            }
+          ]
+        }
+      },
+      "create": {
+        "method": "POST",
+        "url": "/loket",
+        "description": "Membuat loket baru",
+        "headers": {
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
+        "body": {
+          "nama_loket": "Loket Pendaftaran 1",
+          "keterangan": "Loket untuk pendaftaran pasien umum",
+          "status": "aktif"
+        },
+        "response": {
+          "success": true,
+          "message": "Loket berhasil ditambahkan",
+          "data": {
+            "id": 1,
+            "nama_loket": "Loket Pendaftaran 1",
+            "keterangan": "Loket untuk pendaftaran pasien umum",
+            "status": "aktif"
+          }
+        }
+      },
+      "get_single": {
+        "method": "GET",
+        "url": "/loket/{id}",
+        "description": "Mendapatkan detail loket",
+        "response": {
+          "success": true,
+          "data": {
+            "id": 1,
+            "nama_loket": "Loket Pendaftaran 1",
+            "keterangan": "Loket untuk pendaftaran pasien umum",
+            "status": "aktif"
+          }
+        }
+      },
+      "update": {
+        "method": "PUT",
+        "url": "/loket/{id}",
+        "description": "Memperbarui data loket",
+        "headers": {
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
+        "body": {
+          "nama_loket": "Loket Pendaftaran 1 (Updated)",
+          "keterangan": "Loket untuk pendaftaran pasien umum dan BPJS",
+          "status": "tidak_aktif"
+        },
+        "response": {
+          "success": true,
+          "message": "Loket berhasil diperbarui"
+        }
+      },
+      "delete": {
+        "method": "DELETE",
+        "url": "/loket/{id}",
+        "description": "Menghapus loket",
+        "response": {
+          "success": true,
+          "message": "Loket berhasil dihapus"
+        }
+      }
+    },
+    "antrian": {
+      "get_all": {
+        "method": "GET",
+        "url": "/antrian",
+        "description": "Mendapatkan daftar semua antrian",
+        "response": {
+          "success": true,
+          "data": [
+            {
+              "id": 1,
+              "nomor_antrian": "A001",
+              "nama_pasien": "Budi Santoso",
+              "status": "menunggu",
+              "loket_id": 1
+            }
+          ]
+        }
+      },
+      "create": {
+        "method": "POST",
+        "url": "/antrian",
+        "description": "Membuat antrian baru",
+        "headers": {
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
+        "body": {
+          "loket_id": 1,
+          "nomor_antrian": "A001",
+          "nama_pasien": "Budi Santoso",
+          "nomor_hp": "081234567890",
+          "jenis_layanan": "Umum",
+          "status": "menunggu"
+        },
+        "response": {
+          "success": true,
+          "message": "Antrian berhasil ditambahkan",
+          "data": {
+            "id": 1,
+            "nomor_antrian": "A001",
+            "status": "menunggu"
+          }
+        }
+      },
+      "get_by_loket": {
+        "method": "GET",
+        "url": "/antrian/loket/{loketId}",
+        "description": "Mendapatkan antrian berdasarkan loket",
+        "response": {
+          "success": true,
+          "data": [
+            {
+              "id": 1,
+              "nomor_antrian": "A001",
+              "status": "menunggu"
+            }
+          ]
+        }
+      },
+      "panggil": {
+        "method": "POST",
+        "url": "/antrian/{id}/panggil",
+        "description": "Memanggil antrian",
+        "response": {
+          "success": true,
+          "message": "Antrian A001 berhasil dipanggil",
+          "data": {
+            "id": 1,
+            "status": "dipanggil"
+          }
+        }
+      },
+      "selesai": {
+        "method": "POST",
+        "url": "/antrian/{id}/selesai",
+        "description": "Menyelesaikan antrian",
+        "response": {
+          "success": true,
+          "message": "Antrian A001 telah selesai",
+          "data": {
+            "id": 1,
+            "status": "selesai"
+          }
+        }
+      }
+    }
+  },
+  "error_responses": {
+    "validation_error": {
+      "status": 422,
+      "response": {
+        "message": "The given data was invalid.",
+        "errors": {
+          "field_name": ["Error message"]
+        }
+      }
+    },
+    "unauthenticated": {
+      "status": 401,
+      "response": {
+        "message": "Unauthenticated."
+      }
+    },
+    "not_found": {
+      "status": 404,
+      "response": {
+        "success": false,
+        "message": "Data tidak ditemukan"
+      }
+    }
+  },
+  "enums": {
+    "status_loket": ["aktif", "tidak_aktif"],
+    "status_antrian": ["menunggu", "dipanggil", "dilayani", "selesai", "batal"],
+    "roles": ["admin", "petugas", "pasien"]
+  },
+  "examples": {
+    "create_loket_request": {
+      "nama_loket": "Loket Pembayaran",
+      "keterangan": "Loket untuk pembayaran",
+      "status": "aktif"
+    },
+    "create_antrian_request": {
+      "loket_id": 1,
+      "nomor_antrian": "A002",
+      "nama_pasien": "Siti Rahayu",
+      "nomor_hp": "081234567891",
+      "jenis_layanan": "BPJS",
+      "status": "menunggu"
+    }
+  }
+}

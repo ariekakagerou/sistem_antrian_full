@@ -1,0 +1,102 @@
+╔═══════════════════════════════════════════════════════════════╗
+║                                                               ║
+║         CARA MENGAKTIFKAN GOOGLE OAUTH                        ║
+║                                                               ║
+╚═══════════════════════════════════════════════════════════════╝
+
+📝 LANGKAH 1: UPDATE FILE .ENV
+═══════════════════════════════════════════════════════════════
+
+Buka file: backend-laravel/.env
+
+Tambahkan atau update baris berikut:
+
+FRONTEND_URL=http://localhost:8001
+
+GOOGLE_CLIENT_ID=your_google_client_id_here
+GOOGLE_CLIENT_SECRET=your_google_client_secret_here
+GOOGLE_REDIRECT_URI=http://127.0.0.1:8000/auth/google/callback
+
+
+📦 LANGKAH 2: INSTALL LARAVEL SOCIALITE (Jika Belum)
+═══════════════════════════════════════════════════════════════
+
+cd backend-laravel
+composer require laravel/socialite
+
+
+⚙️ LANGKAH 3: KONFIGURASI SERVICES.PHP
+═══════════════════════════════════════════════════════════════
+
+Edit file: backend-laravel/config/services.php
+
+Tambahkan di dalam array return:
+
+'google' => [
+    'client_id' => env('GOOGLE_CLIENT_ID'),
+    'client_secret' => env('GOOGLE_CLIENT_SECRET'),
+    'redirect' => env('GOOGLE_REDIRECT_URI'),
+],
+
+
+🗄️ LANGKAH 4: MIGRASI DATABASE (Tambah kolom google_id)
+═══════════════════════════════════════════════════════════════
+
+Jika kolom google_id belum ada di tabel users:
+
+php artisan make:migration add_google_id_to_users_table
+
+Edit migration file yang dibuat, tambahkan:
+
+public function up()
+{
+    Schema::table('users', function (Blueprint $table) {
+        $table->string('google_id')->nullable()->unique()->after('email');
+    });
+}
+
+Jalankan migration:
+
+php artisan migrate
+
+
+🔄 LANGKAH 5: CLEAR CACHE
+═══════════════════════════════════════════════════════════════
+
+php artisan config:clear
+php artisan cache:clear
+
+
+🚀 LANGKAH 6: RESTART SERVER
+═══════════════════════════════════════════════════════════════
+
+Ctrl+C untuk stop server
+php artisan serve
+
+
+✅ LANGKAH 7: TEST
+═══════════════════════════════════════════════════════════════
+
+1. Buka: http://localhost:8001/petugas
+2. Klik tombol "Login dengan Google"
+3. Pilih akun Google
+4. Selesai!
+
+
+🔍 TROUBLESHOOTING
+═══════════════════════════════════════════════════════════════
+
+Error: "Class 'Laravel\Socialite\Facades\Socialite' not found"
+→ Jalankan: composer require laravel/socialite
+
+Error: "Redirect URI mismatch"
+→ Pastikan di Google Console redirect URI: 
+  http://127.0.0.1:8000/auth/google/callback
+
+Error: "Invalid client"
+→ Cek GOOGLE_CLIENT_ID dan GOOGLE_CLIENT_SECRET di .env
+
+
+═══════════════════════════════════════════════════════════════
+Dokumentasi lengkap: GOOGLE_OAUTH_SETUP.md
+═══════════════════════════════════════════════════════════════

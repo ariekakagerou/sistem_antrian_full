@@ -1,0 +1,99 @@
+╔═══════════════════════════════════════════════════════════════╗
+║                                                               ║
+║         SISTEM ANTRIAN RUMAH SAKIT                            ║
+║         Cara Cepat Memulai                                    ║
+║                                                               ║
+╚═══════════════════════════════════════════════════════════════╝
+
+🚀 CARA TERCEPAT - JALANKAN SEMUA SEKALIGUS
+═══════════════════════════════════════════════════════════════
+
+1. Double-click file: START_ALL.bat
+2. Tunggu 10-15 detik
+3. Browser akan otomatis terbuka
+4. Selesai! ✅
+
+
+📝 ATAU JALANKAN SATU PER SATU
+═══════════════════════════════════════════════════════════════
+
+Terminal 1: Double-click "start-backend.bat"
+Terminal 2: Double-click "start-frontend.bat"  
+Terminal 3: Double-click "start-vite.bat"
+
+Tunggu semua berjalan, lalu buka browser:
+http://localhost:8001
+
+
+🌐 URL PENTING
+═══════════════════════════════════════════════════════════════
+
+Pendaftaran Pasien:    http://localhost:8001
+Dashboard Petugas:     http://localhost:8001/petugas
+Display Monitor:       http://localhost:8001/display
+
+Backend API:           http://localhost:8000
+
+
+🔐 LOGIN PETUGAS (Setelah Seeding)
+═══════════════════════════════════════════════════════════════
+
+Email:    petugas@example.com
+Password: password
+
+
+⚙️ SETUP AWAL (Hanya Sekali)
+═══════════════════════════════════════════════════════════════
+
+Jika baru pertama kali:
+
+1. Backend:
+   cd backend-laravel
+   composer install
+   copy .env.example .env
+   php artisan key:generate
+   php artisan migrate
+   php artisan db:seed
+
+2. Frontend:
+   cd frontend-livewire
+   composer install
+   npm install
+   copy .env.example .env
+   php artisan key:generate
+   php artisan migrate
+
+
+📖 DOKUMENTASI LENGKAP
+═══════════════════════════════════════════════════════════════
+
+- README.md              → Dokumentasi utama
+- PANDUAN_SETUP.md       → Panduan setup lengkap
+- frontend-livewire/README_SISTEM_ANTRIAN.md → Dokumentasi frontend
+
+
+❓ TROUBLESHOOTING
+═══════════════════════════════════════════════════════════════
+
+Problem: Backend tidak bisa diakses
+Solusi:  Pastikan port 8000 tidak digunakan aplikasi lain
+
+Problem: Frontend tidak connect ke backend
+Solusi:  Pastikan backend sudah berjalan terlebih dahulu
+
+Problem: Error saat install
+Solusi:  Pastikan PHP, Composer, dan Node.js sudah terinstall
+
+
+💡 TIPS
+═══════════════════════════════════════════════════════════════
+
+✓ Gunakan START_ALL.bat untuk kemudahan
+✓ Jangan tutup terminal yang sedang berjalan
+✓ Untuk display monitor, tekan F11 untuk fullscreen
+✓ Display otomatis refresh setiap 5 detik
+
+
+═══════════════════════════════════════════════════════════════
+Selamat menggunakan Sistem Antrian Rumah Sakit! 🏥
+═══════════════════════════════════════════════════════════════

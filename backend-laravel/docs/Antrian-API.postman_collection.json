@@ -1,0 +1,245 @@
+{
+  "info": {
+    "name": "Antrian API",
+    "description": "API untuk manajemen antrian rumah sakit",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"petugas@example.com\",\n    \"password\": \"password\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "login"]
+            },
+            "description": "Login untuk mendapatkan token akses"
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/logout",
+              "host": ["{{base_url}}"],
+              "path": ["api", "logout"]
+            },
+            "description": "Logout untuk mencabut token akses"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Antrian",
+      "item": [
+        {
+          "name": "Daftar Antrian",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/antrian",
+              "host": ["{{base_url}}"],
+              "path": ["api", "antrian"]
+            },
+            "description": "Mendapatkan daftar semua antrian"
+          }
+        },
+        {
+          "name": "Buat Antrian Baru",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \\\"loket_id\\\": 1,\n    \\\"nama_pasien\\\": \\\"Nama Pasien\\\",\n    \\\"keluhan\\\": \\\"Keluhan pasien\\\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/antrian",
+              "host": ["{{base_url}}"],
+              "path": ["api", "antrian"]
+            },
+            "description": "Membuat antrian baru"
+          }
+        },
+        {
+          "name": "Panggil Antrian",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/antrian/1/panggil",
+              "host": ["{{base_url}}"],
+              "path": ["api", "antrian", "1", "panggil"]
+            },
+            "description": "Memanggil antrian (hanya untuk petugas)"
+          }
+        },
+        {
+          "name": "Selesaikan Antrian",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/antrian/1/selesai",
+              "host": ["{{base_url}}"],
+              "path": ["api", "antrian", "1", "selesai"]
+            },
+            "description": "Menandai antrian sebagai selesai (hanya untuk petugas)"
+          }
+        },
+        {
+          "name": "Cetak Antrian",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/antrian/cetak/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "antrian", "cetak", "1"]
+            },
+            "description": "Mendapatkan data antrian untuk dicetak"
+          }
+        },
+        {
+          "name": "Antrian per Loket",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/antrian/loket/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "antrian", "loket", "1"]
+            },
+            "description": "Mendapatkan daftar antrian berdasarkan loket"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Loket",
+      "item": [
+        {
+          "name": "Daftar Loket",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/loket",
+              "host": ["{{base_url}}"],
+              "path": ["api", "loket"]
+            },
+            "description": "Mendapatkan daftar semua loket"
+          }
+        },
+        {
+          "name": "Tambah Loket (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"nama_loket\": \"Loket Baru\",\n    \"keterangan\": \"Keterangan loket\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/loket",
+              "host": ["{{base_url}}"],
+              "path": ["api", "loket"]
+            },
+            "description": "Menambahkan loket baru (hanya untuk admin)"
+          }
+        }
+      ]
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "exec": [
+          ""
+        ],
+        "type": "text/javascript"
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "exec": [
+          ""
+        ],
+        "type": "text/javascript"
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://127.0.0.1:8000"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "description": "Token yang didapat setelah login"
+    }
+  ]
+}
