@@ -19,7 +19,9 @@ Ikuti langkah-langkah ini secara berurutan:
 
 - [ ] **Step 1**: Clone repository dari GitHub
 - [ ] **Step 2**: Install prasyarat (PHP, Composer, Node.js, Git)
-- [ ] **Step 3**: Setup Backend Laravel
+- [ ] **Step 3**: Setup Backend Laravel + Database
+  - [ ] Pilih database: PostgreSQL Railway / SQLite / MySQL
+  - [ ] Jika Railway: Lihat [RAILWAY_POSTGRESQL_SETUP.md](RAILWAY_POSTGRESQL_SETUP.md)
 - [ ] **Step 4**: Setup Frontend Livewire
 - [ ] **Step 5**: (Opsional) Setup Google OAuth
 - [ ] **Step 6**: Jalankan aplikasi
@@ -27,6 +29,11 @@ Ikuti langkah-langkah ini secara berurutan:
 - [ ] **Step 8**: Login dengan akun default
 
 **⏱️ Estimasi waktu:** 15-30 menit (tergantung kecepatan internet)
+
+**💡 Rekomendasi Database:**
+- 🏠 **Development Lokal**: SQLite (paling mudah, tidak perlu setup)
+- ☁️ **Cloud/Production**: PostgreSQL Railway (gratis, bisa diakses dari mana saja)
+- 🔧 **Custom**: MySQL (jika sudah familiar)
 
 ---
 
@@ -81,16 +88,41 @@ php artisan migrate
 php artisan db:seed
 ```
 
-**Edit file `.env` backend jika perlu:**
+**Edit file `.env` backend:**
+
+**Opsi 1: PostgreSQL dengan Railway (Recommended untuk Production)**
+```env
+DB_CONNECTION=pgsql
+DB_HOST=containers-us-west-xxx.railway.app
+DB_PORT=5432
+DB_DATABASE=railway
+DB_USERNAME=postgres
+DB_PASSWORD=your-railway-password
+
+# Atau gunakan DATABASE_URL dari Railway
+DATABASE_URL=postgresql://postgres:password@host:port/railway
+```
+
+**Cara Setup Railway:**
+1. Buat akun di [Railway.app](https://railway.app/)
+2. Create New Project → Provision PostgreSQL
+3. Copy credentials dari Railway dashboard
+4. Paste ke `.env` backend
+
+**Opsi 2: SQLite (Untuk Development Lokal)**
 ```env
 DB_CONNECTION=sqlite
-# Atau jika pakai MySQL:
-# DB_CONNECTION=mysql
-# DB_HOST=127.0.0.1
-# DB_PORT=3306
-# DB_DATABASE=antrian_rs
-# DB_USERNAME=root
-# DB_PASSWORD=
+# File database akan dibuat otomatis di database/database.sqlite
+```
+
+**Opsi 3: MySQL (Alternatif)**
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=antrian_rs
+DB_USERNAME=root
+DB_PASSWORD=
 ```
 
 ### 4️⃣ Setup Frontend Livewire
@@ -147,6 +179,69 @@ GOOGLE_REDIRECT_URI=http://localhost:8001/auth/google/callback
 ```
 
 **Lihat [GOOGLE_OAUTH_SETUP.md](GOOGLE_OAUTH_SETUP.md) untuk panduan lengkap.**
+
+### 5️⃣.1 Setup PostgreSQL Railway (Detail)
+
+**Langkah-langkah lengkap:**
+
+**1. Buat Akun Railway**
+- Kunjungi https://railway.app/
+- Sign up dengan GitHub/Google
+- Gratis untuk development (500 jam/bulan)
+
+**2. Provision PostgreSQL Database**
+```
+Dashboard → New Project → Provision PostgreSQL
+```
+
+**3. Dapatkan Credentials**
+Klik database PostgreSQL → Variables tab, copy:
+- `PGHOST` → DB_HOST
+- `PGPORT` → DB_PORT (biasanya 5432)
+- `PGDATABASE` → DB_DATABASE
+- `PGUSER` → DB_USERNAME
+- `PGPASSWORD` → DB_PASSWORD
+
+Atau copy langsung `DATABASE_URL`:
+```
+postgresql://postgres:password@containers-us-west-xxx.railway.app:5432/railway
+```
+
+**4. Update `.env` Backend**
+```env
+DB_CONNECTION=pgsql
+DB_HOST=containers-us-west-xxx.railway.app
+DB_PORT=5432
+DB_DATABASE=railway
+DB_USERNAME=postgres
+DB_PASSWORD=xxxxxxxxxxxxx
+
+# Atau gunakan DATABASE_URL
+DATABASE_URL=postgresql://postgres:xxxxx@containers-us-west-xxx.railway.app:5432/railway
+```
+
+**5. Install Driver PostgreSQL (Jika Belum)**
+```bash
+# Untuk Windows, pastikan extension pgsql sudah enable di php.ini
+# Uncomment baris ini:
+extension=pdo_pgsql
+extension=pgsql
+
+# Restart PHP/Server setelah edit php.ini
+```
+
+**6. Test Koneksi**
+```bash
+cd backend-laravel
+php artisan migrate:fresh --seed
+```
+
+**7. Keuntungan Railway:**
+- ✅ Gratis untuk development
+- ✅ Database cloud (bisa diakses dari mana saja)
+- ✅ Automatic backups
+- ✅ Monitoring & logs
+- ✅ Mudah scale untuk production
 
 ### 6️⃣ Jalankan Aplikasi
 
@@ -252,6 +347,45 @@ npm run dev
 npm run build
 ```
 
+**❌ Error PostgreSQL: "could not find driver"**
+```bash
+# Enable extension PostgreSQL di php.ini
+# Cari file php.ini (jalankan: php --ini)
+# Uncomment baris berikut:
+extension=pdo_pgsql
+extension=pgsql
+
+# Restart server setelah edit
+```
+
+**❌ Error: "SQLSTATE[08006] Connection refused" (Railway)**
+```bash
+# 1. Pastikan credentials Railway benar di .env
+# 2. Cek Railway dashboard apakah database masih running
+# 3. Pastikan tidak ada firewall yang block koneksi
+# 4. Test koneksi manual:
+php artisan tinker
+>>> DB::connection()->getPdo();
+```
+
+**❌ Error: "SQLSTATE[42P01] Table not found" (Railway)**
+```bash
+# Jalankan migration ke Railway database
+cd backend-laravel
+php artisan migrate:fresh --seed
+
+# Pastikan DB_CONNECTION=pgsql di .env
+```
+
+**❌ Railway database penuh/limit exceeded**
+```bash
+# Railway free tier: 512MB storage
+# Solusi:
+# 1. Hapus data lama
+# 2. Upgrade ke paid plan
+# 3. Atau gunakan database lain
+```
+
 ---
 
 ## 🎯 Fitur Utama
@@ -300,11 +434,17 @@ sistem antrian rumah sakit/
 │       ├── components/layout.blade.php
 │       └── livewire/
 │
+├── DOKUMENTASI/              # Folder dokumentasi
+│   ├── README.md             # Dokumentasi utama (file ini)
+│   ├── PANDUAN_SETUP.md      # Panduan lengkap setup
+│   ├── RAILWAY_POSTGRESQL_SETUP.md  # Setup PostgreSQL Railway
+│   ├── GOOGLE_OAUTH_SETUP.md # Setup Google OAuth
+│   └── [dokumentasi lainnya]
+│
 ├── START_ALL.bat             # Jalankan semua service sekaligus
 ├── start-backend.bat         # Jalankan backend saja
 ├── start-frontend.bat        # Jalankan frontend saja
-├── start-vite.bat            # Jalankan vite saja
-└── PANDUAN_SETUP.md          # Panduan lengkap setup
+└── start-vite.bat            # Jalankan vite saja
 ```
 
 ## 🚀 Quick Start
@@ -383,7 +523,7 @@ php artisan migrate
 
 ### Backend
 - Laravel 11
-- MySQL/SQLite
+- PostgreSQL (Railway) / MySQL / SQLite
 - Laravel Sanctum (Authentication)
 - RESTful API
 
@@ -391,8 +531,12 @@ php artisan migrate
 - Laravel 11
 - Livewire 3
 - Tailwind CSS
-- Alpine.js
 - Font Awesome
+
+### Database Options
+- **PostgreSQL** (Railway) - Cloud database, gratis untuk development
+- **SQLite** - File-based, mudah untuk development lokal
+- **MySQL** - Traditional relational database
 
 ## 📱 Screenshot
 
@@ -415,9 +559,19 @@ Password: password
 
 ## 📖 Dokumentasi
 
+### Panduan Setup
 - [PANDUAN_SETUP.md](PANDUAN_SETUP.md) - Panduan setup lengkap
+- [RAILWAY_POSTGRESQL_SETUP.md](RAILWAY_POSTGRESQL_SETUP.md) - **Setup PostgreSQL Railway** ⭐
 - [GOOGLE_OAUTH_SETUP.md](GOOGLE_OAUTH_SETUP.md) - Setup Google OAuth login
-- [frontend-livewire/README_SISTEM_ANTRIAN.md](frontend-livewire/README_SISTEM_ANTRIAN.md) - Dokumentasi frontend
+
+### Dokumentasi Fitur
+- [FITUR_PASIEN_LENGKAP.md](FITUR_PASIEN_LENGKAP.md) - Fitur pendaftaran pasien
+- [FITUR_PAGINATION_LOKET.md](FITUR_PAGINATION_LOKET.md) - Pagination antrian
+- [PANDUAN_PETUGAS_PANEL.md](PANDUAN_PETUGAS_PANEL.md) - Panel petugas
+
+### Referensi Teknis
+- [ROUTE_STRUCTURE.md](ROUTE_STRUCTURE.md) - Struktur routing
+- [ENV_CONFIGURATION.md](ENV_CONFIGURATION.md) - Konfigurasi environment
 
 ## 🐛 Troubleshooting
 
