@@ -87,30 +87,40 @@
             </div>
         </div>
     @else
-        <!-- Panel Petugas dengan Sidebar -->
-        <div class="flex" x-data="{ sidebarOpen: false }">
-            <!-- Sidebar -->
-            @include('components.petugas.sidebar')
+        <!-- Panel Petugas -->
+        @if($selectedLoket)
+            <!-- Panel dengan Sidebar -->
+            <div class="flex" x-data="{ sidebarOpen: false }">
+                <!-- Sidebar -->
+                @include('components.petugas.sidebar')
 
-            <!-- Main Content -->
-            <div class="flex-1 lg:ml-64 p-3 sm:p-4 md:p-6">
-                @if($selectedLoket)
+                <!-- Main Content -->
+                <div class="flex-1 lg:ml-64 p-3 sm:p-4 md:p-6">
                     <!-- Header Konten Utama -->
                     <div class="mb-4 sm:mb-6">
-                        <div class="bg-white rounded-lg sm:rounded-xl shadow-lg px-4 sm:px-6 py-3 sm:py-4">
-                            <!-- Mobile Menu Button -->
-                            <button @click="sidebarOpen = !sidebarOpen" class="lg:hidden mr-3 text-gray-600 hover:text-gray-800">
-                                <i class="fas fa-bars text-xl"></i>
-                            </button>
-                            
-                            <div class="flex-1">
-                                <h1 class="text-lg sm:text-xl md:text-2xl font-bold text-gray-800">
-                                    <i class="fas fa-layer-group text-indigo-600 mr-2"></i>
-                                    {{ ['dashboard'=>'Dashboard','daftar-antrian'=>'Daftar Antrian','pemanggilan'=>'Pemanggilan Pasien','riwayat'=>'Riwayat Pelayanan','pengaturan'=>'Pengaturan Akun'][$activeMenu] ?? 'Dashboard' }}
-                                </h1>
-                                <p class="text-xs sm:text-sm text-gray-600 mt-1">
-                                    Loket: <span class="font-semibold text-gray-800">{{ $loketNama }}</span>
-                                </p>
+                        <div class="bg-white rounded-lg sm:rounded-xl shadow-lg px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
+                            <div class="flex items-center flex-1">
+                                <!-- Mobile Menu Button -->
+                                <button @click="sidebarOpen = !sidebarOpen" class="lg:hidden mr-3 text-gray-600 hover:text-gray-800">
+                                    <i class="fas fa-bars text-xl"></i>
+                                </button>
+                                
+                                <div class="flex-1">
+                                    <h1 class="text-lg sm:text-xl md:text-2xl font-bold text-gray-800">
+                                        <i class="fas fa-layer-group text-indigo-600 mr-2"></i>
+                                        <span wire:loading.remove wire:target="changeMenu">
+                                            {{ ['dashboard'=>'Dashboard','daftar-antrian'=>'Daftar Antrian','pemanggilan'=>'Pemanggilan Pasien','riwayat'=>'Riwayat Pelayanan','pengaturan'=>'Pengaturan Akun'][$activeMenu] ?? 'Dashboard' }}
+                                        </span>
+                                        <span wire:loading wire:target="changeMenu" class="text-indigo-400">
+                                            <i class="fas fa-spinner fa-spin mr-2"></i>
+                                            Memuat...
+                                        </span>
+                                    </h1>
+                                    <p class="text-xs sm:text-sm text-gray-600 mt-1">
+                                        Loket: <span class="font-semibold text-gray-800">{{ $loketNama }}</span>
+                                        <span class="ml-2 text-xs text-gray-500">(Menu: {{ $activeMenu }})</span>
+                                    </p>
+                                </div>
                             </div>
                             <div class="flex items-center gap-2">
                                 <button wire:click="refreshData" class="inline-flex items-center px-3 sm:px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-all duration-200 text-sm sm:text-base">
@@ -124,10 +134,49 @@
                             </div>
                         </div>
                     </div>
-                @endif
-                @if(!$selectedLoket)
-                    <!-- Pilih Loket -->
-                    <div class="max-w-6xl mx-auto">
+                    
+                    <!-- Konten Berdasarkan Menu Aktif -->
+                    @switch($activeMenu)
+                        @case('dashboard')
+                            <div wire:key="dashboard-content">
+                                @include('components.petugas.dashboard')
+                            </div>
+                            @break
+                        
+                        @case('daftar-antrian')
+                            <div wire:key="daftar-antrian-content">
+                                @include('components.petugas.daftar-antrian')
+                            </div>
+                            @break
+                        
+                        @case('pemanggilan')
+                            <div wire:key="pemanggilan-content">
+                                @include('components.petugas.pemanggilan')
+                            </div>
+                            @break
+                        
+                        @case('riwayat')
+                            <div wire:key="riwayat-content">
+                                @include('components.petugas.riwayat')
+                            </div>
+                            @break
+                        
+                        @case('pengaturan')
+                            <div wire:key="pengaturan-content">
+                                @include('components.petugas.pengaturan')
+                            </div>
+                            @break
+                        
+                        @default
+                            <div wire:key="dashboard-content">
+                                @include('components.petugas.dashboard')
+                            </div>
+                    @endswitch
+                </div>
+            </div>
+        @else
+            <!-- Pilih Loket -->
+            <div class="max-w-6xl mx-auto p-3 sm:p-4 md:p-6">
                         <div class="bg-white rounded-lg sm:rounded-xl shadow-lg p-4 sm:p-6 md:p-8">
                             <div class="text-center mb-6 sm:mb-8">
                                 <div class="inline-flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 bg-indigo-100 rounded-full mb-3 sm:mb-4">
@@ -168,21 +217,8 @@
                             @endif
                         </div>
                     </div>
-                @else
-                    <!-- Konten Berdasarkan Menu Aktif -->
-                    @if($activeMenu === 'dashboard')
-                        @include('components.petugas.dashboard')
-                    @elseif($activeMenu === 'daftar-antrian')
-                        @include('components.petugas.daftar-antrian')
-                    @elseif($activeMenu === 'pemanggilan')
-                        @include('components.petugas.pemanggilan')
-                    @elseif($activeMenu === 'riwayat')
-                        @include('components.petugas.riwayat')
-                    @elseif($activeMenu === 'pengaturan')
-                        @include('components.petugas.pengaturan')
-                    @endif
-                @endif
+                </div>
             </div>
-        </div>
+        @endif
     @endif
 </div>

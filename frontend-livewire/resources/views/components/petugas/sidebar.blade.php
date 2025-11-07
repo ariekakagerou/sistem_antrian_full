@@ -49,18 +49,16 @@
     <nav class="flex-1 overflow-y-auto py-3 sm:py-4">
         <ul class="space-y-1 px-2 sm:px-3">
             <li>
-                <a href="{{ $selectedLoket ? route('petugas.dashboard', $selectedLoket) : '#' }}" 
-                   wire:click.prevent="$set('activeMenu', 'dashboard')"
+                <button wire:click="changeMenu('dashboard')" 
                    @click="sidebarOpen = false"
                    class="w-full flex items-center space-x-2 sm:space-x-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg transition-all duration-200 text-sm sm:text-base
                           {{ $activeMenu === 'dashboard' ? 'bg-white text-indigo-700 shadow-lg' : 'text-indigo-100 hover:bg-indigo-800' }}">
                     <i class="fas fa-home w-4 sm:w-5"></i>
                     <span class="font-semibold">Dashboard</span>
-                </a>
+                </button>
             </li>
             <li>
-                <a href="{{ $selectedLoket ? route('petugas.daftar-antrian', $selectedLoket) : '#' }}" 
-                   wire:click.prevent="$set('activeMenu', 'daftar-antrian')"
+                <button wire:click="changeMenu('daftar-antrian')" 
                    @click="sidebarOpen = false"
                    class="w-full flex items-center space-x-2 sm:space-x-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg transition-all duration-200 text-sm sm:text-base
                           {{ $activeMenu === 'daftar-antrian' ? 'bg-white text-indigo-700 shadow-lg' : 'text-indigo-100 hover:bg-indigo-800' }}">
@@ -71,37 +69,34 @@
                             {{ $jumlahMenunggu }}
                         </span>
                     @endif
-                </a>
+                </button>
             </li>
             <li>
-                <a href="{{ $selectedLoket ? route('petugas.pemanggilan', $selectedLoket) : '#' }}" 
-                   wire:click.prevent="$set('activeMenu', 'pemanggilan')"
+                <button wire:click="changeMenu('pemanggilan')" 
                    @click="sidebarOpen = false"
                    class="w-full flex items-center space-x-2 sm:space-x-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg transition-all duration-200 text-sm sm:text-base
                           {{ $activeMenu === 'pemanggilan' ? 'bg-white text-indigo-700 shadow-lg' : 'text-indigo-100 hover:bg-indigo-800' }}">
                     <i class="fas fa-bullhorn w-4 sm:w-5"></i>
                     <span class="font-semibold">Pemanggilan Pasien</span>
-                </a>
+                </button>
             </li>
             <li>
-                <a href="{{ $selectedLoket ? route('petugas.riwayat', $selectedLoket) : '#' }}" 
-                   wire:click.prevent="$set('activeMenu', 'riwayat')"
+                <button wire:click="changeMenu('riwayat')" 
                    @click="sidebarOpen = false"
                    class="w-full flex items-center space-x-2 sm:space-x-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg transition-all duration-200 text-sm sm:text-base
                           {{ $activeMenu === 'riwayat' ? 'bg-white text-indigo-700 shadow-lg' : 'text-indigo-100 hover:bg-indigo-800' }}">
                     <i class="fas fa-history w-4 sm:w-5"></i>
                     <span class="font-semibold">Riwayat Pelayanan</span>
-                </a>
+                </button>
             </li>
             <li>
-                <a href="{{ $selectedLoket ? route('petugas.pengaturan', $selectedLoket) : '#' }}" 
-                   wire:click.prevent="$set('activeMenu', 'pengaturan')"
+                <button wire:click="changeMenu('pengaturan')" 
                    @click="sidebarOpen = false"
                    class="w-full flex items-center space-x-2 sm:space-x-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg transition-all duration-200 text-sm sm:text-base
                           {{ $activeMenu === 'pengaturan' ? 'bg-white text-indigo-700 shadow-lg' : 'text-indigo-100 hover:bg-indigo-800' }}">
                     <i class="fas fa-cog w-4 sm:w-5"></i>
                     <span class="font-semibold">Pengaturan Akun</span>
-                </a>
+                </button>
             </li>
         </ul>
     </nav>
@@ -139,4 +134,9 @@
             timeElement.textContent = hours + ':' + minutes;
         }
     }, 1000);
+    
+    // Debug: Log ketika menu diklik
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('Sidebar loaded');
+    });
 </script>

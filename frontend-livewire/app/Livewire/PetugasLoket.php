@@ -108,9 +108,10 @@ class PetugasLoket extends Component
         return redirect($googleAuthUrl);
     }
 
-    public function logout(ApiService $apiService)
+    public function logout()
     {
         try {
+            $apiService = app(ApiService::class);
             $apiService->logout();
             $this->isLoggedIn = false;
             $this->reset(['selectedLoket', 'antrians', 'antrianAktif']);
@@ -174,7 +175,7 @@ class PetugasLoket extends Component
         }
     }
 
-    public function selectLoket($loketId, ApiService $apiService)
+    public function selectLoket($loketId)
     {
         $this->selectedLoket = $loketId;
         
@@ -183,12 +184,14 @@ class PetugasLoket extends Component
             $loket = collect($this->lokets)->firstWhere('id', $loketId);
             $this->loketNama = $loket['nama_loket'] ?? '';
             $this->activeMenu = 'dashboard';
+            
+            // Load data antrian
+            $apiService = app(ApiService::class);
+            $this->loadAntrians($apiService);
+            $this->loadStatistik();
         } else {
             $this->loketNama = '';
         }
-        
-        $this->loadAntrians($apiService);
-        $this->loadStatistik();
     }
 
     public function loadAntrians(ApiService $apiService)
@@ -231,9 +234,10 @@ class PetugasLoket extends Component
         ];
     }
 
-    public function panggilAntrian($antrianId, ApiService $apiService)
+    public function panggilAntrian($antrianId)
     {
         try {
+            $apiService = app(ApiService::class);
             $apiService->panggilAntrian($antrianId);
             $this->loadAntrians($apiService);
             
@@ -249,9 +253,10 @@ class PetugasLoket extends Component
         }
     }
 
-    public function selesaiAntrian($antrianId, ApiService $apiService)
+    public function selesaiAntrian($antrianId)
     {
         try {
+            $apiService = app(ApiService::class);
             $apiService->selesaiAntrian($antrianId);
             $this->loadAntrians($apiService);
             
@@ -267,13 +272,15 @@ class PetugasLoket extends Component
         }
     }
 
-    public function refreshAntrians(ApiService $apiService)
+    public function refreshAntrians()
     {
+        $apiService = app(ApiService::class);
         $this->loadAntrians($apiService);
     }
     
-    public function refreshData(ApiService $apiService)
+    public function refreshData()
     {
+        $apiService = app(ApiService::class);
         $this->loadAntrians($apiService);
         $this->dispatch('notification', [
             'message' => 'Data berhasil diperbarui',
@@ -281,16 +288,16 @@ class PetugasLoket extends Component
         ]);
     }
     
-    public function panggilPasienBerikutnya(ApiService $apiService)
+    public function panggilPasienBerikutnya()
     {
         if ($this->antrianBerikutnya) {
-            $this->panggilAntrian($this->antrianBerikutnya['id'], $apiService);
+            $this->panggilAntrian($this->antrianBerikutnya['id']);
         }
     }
     
-    public function panggilUlang($antrianId, ApiService $apiService)
+    public function panggilUlang($antrianId)
     {
-        $this->panggilAntrian($antrianId, $apiService);
+        $this->panggilAntrian($antrianId);
     }
     
     public function exportRiwayat()
@@ -314,6 +321,19 @@ class PetugasLoket extends Component
         $this->dispatch('notification', [
             'message' => 'Password berhasil diubah',
             'type' => 'success'
+        ]);
+    }
+    
+    public function changeMenu($menu)
+    {
+        $this->activeMenu = $menu;
+        
+        // Debug log
+        \Log::info('Menu changed to: ' . $menu);
+        
+        $this->dispatch('notification', [
+            'message' => 'Menu berubah ke: ' . $menu,
+            'type' => 'info'
         ]);
     }
 
