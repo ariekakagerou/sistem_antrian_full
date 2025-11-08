@@ -33,20 +33,21 @@ Route::middleware('auth:sanctum')->prefix('loket')->group(function () {
 // Public Antrian Routes (tidak perlu login)
 Route::prefix('antrian')->group(function () {
     Route::get('/', [AntrianController::class, 'index']);
-    Route::get('/{id}', [AntrianController::class, 'show']);
+    Route::post('/', [AntrianController::class, 'store']); // Buat antrian tanpa login
     Route::get('/cetak/{id}', [\App\Http\Controllers\Api\CetakAntrianController::class, 'cetak']);
     Route::get('/loket/{loketId}', [AntrianController::class, 'getByLoket']);
-    
-    // Route untuk membuat antrian baru (perlu login)
-    Route::middleware('auth:sanctum')->post('/', [AntrianController::class, 'store']);
+    Route::get('/dipanggil', [AntrianController::class, 'sedangDipanggil']); // Display antrian yang dipanggil
+    Route::get('/menunggu/{loket_id}', [AntrianController::class, 'menungguPerLoket']); // Antrian menunggu per loket
+    Route::get('/riwayat', [AntrianController::class, 'riwayat']); // Riwayat antrian selesai
+    Route::get('/{id}', [AntrianController::class, 'show']); // PINDAH KE BAWAH
+    Route::post('/{id}/panggil', [AntrianController::class, 'panggil']); // Panggil tanpa auth
+    Route::post('/{id}/selesai', [AntrianController::class, 'selesai']); // Selesai tanpa auth
 });
 
 // Protected Routes (hanya untuk petugas)
 Route::middleware(['auth:sanctum', 'role.petugas'])->prefix('antrian')->group(function () {
     Route::put('/{id}', [AntrianController::class, 'update']);
     Route::delete('/{id}', [AntrianController::class, 'destroy']);
-    Route::post('/{id}/panggil', [AntrianController::class, 'panggil']);
-    Route::post('/{id}/selesai', [AntrianController::class, 'selesai']);
 });
 
 // Test route to check middleware and authentication

@@ -128,6 +128,116 @@
         </div>
     </div>
 
-    <!-- Success Modal - Include Component -->
-    @include('components.pasien.modal-sukses')
+    <!-- Debug Button - Hapus untuk production -->
+    <div class="fixed bottom-4 right-4 z-40">
+        <button wire:click="testModal" 
+                class="bg-red-500 text-white px-3 py-2 rounded-lg shadow-lg hover:bg-red-600 text-sm">
+            Test Modal
+        </button>
+    </div>
+
+    <!-- Success Modal - Langsung di view utama -->
+@if($showSuccess && $antrianBaru)
+    <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-3 sm:p-4" 
+         x-data="{ show: true }"
+         x-show="show"
+         x-transition>
+        <div class="bg-white rounded-xl sm:rounded-2xl shadow-2xl max-w-3xl w-full p-4 sm:p-6 md:p-8 max-h-[90vh] overflow-y-auto">
+            <!-- Header Success -->
+            <div class="text-center mb-4 sm:mb-6">
+                <div class="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 bg-green-100 rounded-full mb-3 sm:mb-4 animate-bounce">
+                    <i class="fas fa-check-circle text-3xl sm:text-4xl text-green-600"></i>
+                </div>
+                <h2 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-2">Pendaftaran Berhasil!</h2>
+                <p class="text-sm sm:text-base text-gray-600">Terima kasih telah mendaftar. Berikut adalah tiket antrian Anda</p>
+            </div>
+
+            <!-- Tiket Antrian Card -->
+            <div class="bg-gradient-to-br from-blue-50 to-indigo-50 border-2 sm:border-4 border-blue-600 rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 mb-4 sm:mb-6" id="tiket-antrian">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+                    <!-- Kolom Kiri - Nomor Antrian -->
+                    <div class="text-center md:text-left">
+                        <p class="text-xs sm:text-sm font-medium text-gray-500 mb-1 sm:mb-2">NOMOR ANTRIAN</p>
+                        <p class="text-4xl sm:text-5xl md:text-6xl font-black text-blue-600 mb-2 sm:mb-3">{{ $antrianBaru['nomor_antrian'] ?? 'N/A' }}</p>
+                        <p class="text-xs sm:text-sm text-gray-500">
+                            <i class="fas fa-clock mr-1"></i>
+                            {{ $antrianBaru['waktu_pendaftaran'] ?? now()->format('H:i:s') }}
+                        </p>
+                    </div>
+
+                    <!-- Kolom Kanan - Informasi Pasien -->
+                    <div class="text-center md:text-right">
+                        <p class="text-xs sm:text-sm font-medium text-gray-500 mb-1 sm:mb-2">NAMA PASIEN</p>
+                        <p class="text-xl sm:text-2xl font-bold text-gray-800 mb-3 sm:mb-4">{{ $antrianBaru['nama_pasien'] ?? 'N/A' }}</p>
+                        <div class="space-y-1 sm:space-y-2">
+                            <p class="text-xs sm:text-sm text-gray-600">
+                                <i class="fas fa-door-open mr-1"></i>
+                                <strong>Loket:</strong> {{ $antrianBaru['loket'] ?? ($antrianBaru['nama_loket'] ?? 'N/A') }}
+                            </p>
+                            <p class="text-xs sm:text-sm text-gray-600">
+                                <i class="fas fa-stethoscope mr-1"></i>
+                                <strong>Poli:</strong> {{ $antrianBaru['poli_tujuan'] ?? 'Umum' }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Estimasi Waktu -->
+                <div class="mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-gray-200">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 text-center">
+                        <div class="bg-yellow-50 rounded-lg p-3 sm:p-4">
+                            <p class="text-xs sm:text-sm text-gray-600 mb-1">ESTIMASI TUNGGU</p>
+                            <p class="text-lg sm:text-xl font-bold text-yellow-600">{{ $antrianBaru['estimasi_waktu_tunggu'] ?? '30 menit' }}</p>
+                        </div>
+                        <div class="bg-green-50 rounded-lg p-3 sm:p-4">
+                            <p class="text-xs sm:text-sm text-gray-600 mb-1">PERKIRAAN DIPANGGIL</p>
+                            <p class="text-lg sm:text-xl font-bold text-green-600">{{ $antrianBaru['perkiraan_dipanggil'] ?? '14:50 WIB' }}</p>
+                        </div>
+                        <div class="bg-blue-50 rounded-lg p-3 sm:p-4">
+                            <p class="text-xs sm:text-sm text-gray-600 mb-1">STATUS</p>
+                            <p class="text-lg sm:text-xl font-bold text-blue-600">MENUNGGU</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
+                <button wire:click="cetakTiket" 
+                        class="flex items-center justify-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
+                    <i class="fas fa-print mr-2"></i>
+                    Cetak Tiket
+                </button>
+                <button wire:click="closeSuccess" 
+                        class="flex items-center justify-center px-6 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors font-medium">
+                    <i class="fas fa-times mr-2"></i>
+                    Tutup
+                </button>
+                <a href="/display" 
+                   class="flex items-center justify-center px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium">
+                    <i class="fas fa-tv mr-2"></i>
+                    Lihat Display
+                </a>
+            </div>
+        </div>
+    </div>
+@endif
 </div>
+
+@push('scripts')
+<script>
+    // Listen untuk event print-tiket
+    document.addEventListener('livewire:init', () => {
+        Livewire.on('print-tiket', () => {
+            window.print();
+        });
+
+        Livewire.on('open-whatsapp', (event) => {
+            const message = event.message || event[0]?.message;
+            if (message) {
+                window.open(`https://wa.me/?text=${message}`, '_blank');
+            }
+        });
+    });
+</script>
+@endpush

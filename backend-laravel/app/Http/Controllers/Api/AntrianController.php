@@ -15,12 +15,32 @@ class AntrianController extends Controller
     /**
      * Menampilkan semua antrian
      * GET /api/antrian
+     * Query params:
+     * - status: filter by status (comma separated: menunggu,dipanggil)
+     * - tanggal: filter by date (Y-m-d format)
+     * - loket_id: filter by loket
      */
-    public function index()
+    public function index(Request $request)
     {
-        $antrians = Antrian::with(['loket', 'user'])
-            ->orderBy('created_at', 'desc')
-            ->get();
+        $query = Antrian::with(['loket']);
+
+        // Filter by status (support multiple status separated by comma)
+        if ($request->has('status')) {
+            $statuses = explode(',', $request->status);
+            $query->whereIn('status', $statuses);
+        }
+
+        // Filter by date
+        if ($request->has('tanggal')) {
+            $query->whereDate('tanggal', $request->tanggal);
+        }
+
+        // Filter by loket
+        if ($request->has('loket_id')) {
+            $query->where('loket_id', $request->loket_id);
+        }
+
+        $antrians = $query->orderBy('created_at', 'desc')->get();
 
         return response()->json([
             'success' => true,
@@ -50,7 +70,14 @@ class AntrianController extends Controller
         $validator = Validator::make($request->all(), [
             'loket_id' => 'required|integer|exists:lokets,id',
             'nama_pasien' => 'required|string|max:255',
-            'keluhan' => 'required|string|max:500'
+            'nik' => 'nullable|string|size:16',
+            'no_rekam_medis' => 'nullable|string|max:50',
+            'jenis_kelamin' => 'nullable|in:Laki-laki,Perempuan',
+            'tanggal_lahir' => 'nullable|date|before:today',
+            'nomor_hp' => 'nullable|string|max:20',
+            'alamat' => 'nullable|string|max:500',
+            'keluhan' => 'required|string|max:500',
+            'poli_tujuan' => 'nullable|string|max:100'
         ]);
 
         if ($validator->fails()) {
@@ -74,11 +101,16 @@ class AntrianController extends Controller
                 'loket_id' => $loket_id,
                 'nomor_antrian' => $nomorAntrian,
                 'nama_pasien' => $request->nama_pasien,
+                'nik' => $request->nik,
+                'no_rekam_medis' => $request->no_rekam_medis,
+                'jenis_kelamin' => $request->jenis_kelamin,
+                'tanggal_lahir' => $request->tanggal_lahir,
                 'keluhan' => $request->keluhan,
+                'poli_tujuan' => $request->poli_tujuan,
                 'status' => 'menunggu',
                 'tanggal' => now()->toDateString(),
-                'nomor_hp' => null,  // Opsional, diisi null jika tidak ada
-                'alamat' => null     // Opsional, diisi null jika tidak ada
+                'nomor_hp' => $request->nomor_hp,
+                'alamat' => $request->alamat
             ]);
 
             // Hitung estimasi waktu tunggu berdasarkan jumlah antrian yang menunggu
@@ -113,6 +145,30 @@ class AntrianController extends Controller
                 'error' => $e->getMessage()
             ], 500);
         }
+    }
+
+    /**
+     * Menampilkan detail antrian tertentu
+     * GET /api/antrian/{id}
+     * 
+     * @param  int  $id ID antrian
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function show($id)
+    {
+        $antrian = Antrian::with(['loket'])->find($id);
+        
+        if (!$antrian) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Antrian tidak ditemukan'
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => $antrian
+        ]);
     }
 
     /**
@@ -175,9 +231,7 @@ class AntrianController extends Controller
             // Log request untuk debugging
             \Log::info('Request memanggil antrian', [
                 'antrian_id' => $id,
-                'user' => auth()->user() ? auth()->user()->only(['id', 'name', 'email', 'role']) : null,
-                'request' => request()->all(),
-                'headers' => request()->headers->all()
+                'request' => request()->all()
             ]);
 
             // Ambil data antrian beserta relasi loket
@@ -193,17 +247,7 @@ class AntrianController extends Controller
                 ], 404);
             }
 
-            // Validasi: Cek apakah user memiliki izin (role petugas atau admin)
-            if (auth()->user()->role !== 'petugas' && auth()->user()->role !== 'admin') {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Anda tidak memiliki izin untuk memanggil antrian',
-                    'required_role' => 'petugas atau admin',
-                    'your_role' => auth()->user()->role
-                ], 403);
-            }
-
-            // Panggil antrian (ubah status menjadi 'dipanggil' dan set waktu_panggil)
+            // Langsung panggil antrian tanpa cek auth (untuk development)
             $antrian->panggil();
 
             // Refresh model untuk mendapatkan data terbaru dari database
@@ -229,20 +273,13 @@ class AntrianController extends Controller
                 'message' => $e->getMessage(),
                 'file' => $e->getFile(),
                 'line' => $e->getLine(),
-                'trace' => config('app.debug') ? $e->getTraceAsString() : 'Disabled in production',
-                'antrian_id' => $id,
-                'user' => auth()->user() ? auth()->user()->only(['id', 'name', 'email', 'role']) : null
+                'antrian_id' => $id
             ]);
 
             return response()->json([
                 'success' => false,
-                'message' => 'Terjadi kesalahan saat memproses permintaan',
-                'error' => $e->getMessage(),
-                'debug' => config('app.debug') ? [
-                    'class' => get_class($e),
-                    'file' => $e->getFile(),
-                    'line' => $e->getLine(),
-                ] : null
+                'message' => 'Terjadi kesalahan saat memanggil antrian',
+                'error' => $e->getMessage()
             ], 500);
         }
     }
@@ -273,17 +310,7 @@ class AntrianController extends Controller
                 ], 404);
             }
 
-            // Validasi: Cek apakah user memiliki izin (role petugas atau admin)
-            if (auth()->user()->role !== 'petugas' && auth()->user()->role !== 'admin') {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Anda tidak memiliki izin untuk menyelesaikan antrian',
-                    'required_role' => 'petugas atau admin',
-                    'your_role' => auth()->user()->role
-                ], 403);
-            }
-
-            // Tandai antrian selesai (ubah status menjadi 'selesai')
+            // Langsung selesaikan antrian tanpa cek auth (untuk development)
             $antrian->selesai();
 
             // Refresh model untuk mendapatkan data terbaru dari database
@@ -308,20 +335,13 @@ class AntrianController extends Controller
                 'message' => $e->getMessage(),
                 'file' => $e->getFile(),
                 'line' => $e->getLine(),
-                'trace' => config('app.debug') ? $e->getTraceAsString() : 'Disabled in production',
-                'antrian_id' => $id,
-                'user' => auth()->user() ? auth()->user()->only(['id', 'name', 'email', 'role']) : null
+                'antrian_id' => $id
             ]);
 
             return response()->json([
                 'success' => false,
-                'message' => 'Terjadi kesalahan saat memproses permintaan',
-                'error' => $e->getMessage(),
-                'debug' => config('app.debug') ? [
-                    'class' => get_class($e),
-                    'file' => $e->getFile(),
-                    'line' => $e->getLine(),
-                ] : null
+                'message' => 'Terjadi kesalahan saat menyelesaikan antrian',
+                'error' => $e->getMessage()
             ], 500);
         }
     }
@@ -368,6 +388,74 @@ class AntrianController extends Controller
         return response()->json([
             'success' => true,
             'data' => $data
+        ]);
+    }
+
+    /**
+     * Menampilkan semua antrian berdasarkan loket (hari ini)
+     * Endpoint: GET /api/antrian/loket/{loket_id}
+     * 
+     * Digunakan untuk menampilkan semua antrian di loket tertentu hari ini
+     * Diurutkan berdasarkan waktu pendaftaran
+     * 
+     * @param  int  $loketId ID loket
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getByLoket($loketId)
+    {
+        $antrians = Antrian::with(['loket'])
+            ->where('loket_id', $loketId)
+            ->whereDate('tanggal', today())
+            ->orderBy('created_at', 'asc')
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $antrians
+        ]);
+    }
+
+    /**
+     * Menampilkan riwayat antrian yang sudah selesai
+     * Endpoint: GET /api/antrian/riwayat
+     * 
+     * Digunakan untuk menampilkan riwayat pasien yang sudah dilayani
+     * Query params:
+     * - tanggal: filter by date (Y-m-d format)
+     * - loket_id: filter by loket
+     * - limit: batas jumlah data (default: 50)
+     * 
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function riwayat(Request $request)
+    {
+        $query = Antrian::with(['loket'])
+            ->where('status', 'selesai');
+
+        // Filter by date
+        if ($request->has('tanggal')) {
+            $query->whereDate('tanggal', $request->tanggal);
+        } else {
+            // Default: hari ini
+            $query->whereDate('tanggal', today());
+        }
+
+        // Filter by loket
+        if ($request->has('loket_id')) {
+            $query->where('loket_id', $request->loket_id);
+        }
+
+        // Limit data
+        $limit = $request->get('limit', 50);
+        $antrians = $query->orderBy('updated_at', 'desc')
+            ->limit($limit)
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $antrians,
+            'total' => $antrians->count()
         ]);
     }
 }

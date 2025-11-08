@@ -1,0 +1,11 @@
+{
+    "loket_id": 1,
+    "nama_pasien": "Test Patient",
+    "nik": "1234567890123456",
+    "jenis_kelamin": "Laki-laki",
+    "tanggal_lahir": "1990-01-01",
+    "nomor_hp": "08123456789",
+    "alamat": "Test Address",
+    "keluhan": "Test Complaint",
+    "poli_tujuan": "Poli Umum"
+}

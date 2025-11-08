@@ -1,14 +1,15 @@
-<!-- Tabel Riwayat Antrian Aktif dengan Real-time Update -->
-<div class="bg-white rounded-xl sm:rounded-2xl shadow-xl p-4 sm:p-6 md:p-8 mb-4 sm:mb-6" wire:poll.5s>
+<!-- Tabel Riwayat Antrian Aktif -->
+<div class="bg-white rounded-xl sm:rounded-2xl shadow-xl p-4 sm:p-6 md:p-8 mb-4 sm:mb-6">
     <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 sm:mb-6 gap-2">
         <h2 class="text-xl sm:text-2xl font-bold text-gray-800">
             <i class="fas fa-list-alt mr-2 text-blue-600"></i>
             Riwayat Antrian Aktif
         </h2>
-        <div class="flex items-center space-x-2">
-            <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-            <span class="text-xs sm:text-sm text-gray-600 font-semibold">Live Update</span>
-        </div>
+        <button wire:click="refreshRiwayat" 
+                class="flex items-center space-x-2 px-3 sm:px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs sm:text-sm font-semibold transition-colors">
+            <i class="fas fa-sync-alt"></i>
+            <span>Refresh</span>
+        </button>
     </div>
 
     <div class="overflow-x-auto -mx-4 sm:mx-0">
@@ -98,14 +99,10 @@
     </div>
 
     @if(isset($riwayatAntrian) && count($riwayatAntrian) > 0)
-        <div class="mt-4 sm:mt-6 flex flex-col sm:flex-row items-center justify-between border-t border-gray-200 pt-3 sm:pt-4 gap-2">
+        <div class="mt-4 sm:mt-6 flex flex-col sm:flex-row items-center justify-center border-t border-gray-200 pt-3 sm:pt-4 gap-2">
             <div class="text-xs sm:text-sm text-gray-600">
                 <i class="fas fa-users mr-1 text-blue-600"></i>
                 Total <strong>{{ count($riwayatAntrian) }}</strong> antrian aktif
-            </div>
-            <div class="text-xs sm:text-sm text-gray-500">
-                <i class="fas fa-sync-alt mr-1 animate-spin"></i>
-                Data diperbarui otomatis setiap 5 detik
             </div>
         </div>
     @endif

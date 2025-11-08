@@ -23,7 +23,7 @@
                             <p class="text-xs sm:text-sm text-gray-600 mb-2">Nomor Antrian Anda</p>
                             <div class="bg-white rounded-lg sm:rounded-xl p-4 sm:p-6 shadow-lg">
                                 <div class="text-4xl sm:text-5xl md:text-6xl font-bold text-blue-600 mb-2 sm:mb-4">
-                                    {{ $antrianBaru['nomor_antrian'] ?? '-' }}
+                                    {{ $antrianBaru['nomor_antrian'] ?? ($antrianBaru['no_antrian'] ?? ($antrianBaru['nomorAntrian'] ?? '-')) }}
                                 </div>
                             </div>
                         </div>
@@ -88,20 +88,23 @@
                             
                             <!-- QR Code Placeholder -->
                             <div class="w-32 h-32 sm:w-40 sm:h-40 md:w-48 md:h-48 bg-white border-2 sm:border-4 border-gray-200 rounded-lg sm:rounded-xl flex items-center justify-center">
-                                @if(isset($antrianBaru['nomor_antrian']))
-                                    <!-- QR Code akan di-generate di sini -->
+                                @php
+                                    $nomorAntrianView = $antrianBaru['nomor_antrian'] ?? ($antrianBaru['no_antrian'] ?? ($antrianBaru['nomorAntrian'] ?? null));
+                                @endphp
+                                @if(isset($nomorAntrianView))
+                                    {{-- QR Code akan di-generate di sini --}}
                                     <div class="text-center">
                                         <i class="fas fa-qrcode text-4xl sm:text-5xl md:text-6xl text-gray-400 mb-2"></i>
                                         <p class="text-xs text-gray-500">QR Code</p>
-                                        <p class="text-xs text-gray-400 mt-1">{{ $antrianBaru['nomor_antrian'] }}</p>
+                                        <p class="text-xs text-gray-400 mt-1">{{ $nomorAntrianView }}</p>
                                     </div>
-                                    <!-- 
+                                    {{-- 
                                     Untuk menggunakan QR Code generator, install package:
                                     composer require simplesoftwareio/simple-qrcode
                                     
                                     Kemudian ganti div di atas dengan:
                                     {!! QrCode::size(180)->generate(route('antrian.detail', $antrianBaru['id'])) !!}
-                                    -->
+                                    --}}
                                 @endif
                             </div>
 

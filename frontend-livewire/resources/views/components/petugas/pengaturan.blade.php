@@ -12,7 +12,7 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Form Pengaturan -->
         <div class="lg:col-span-2 space-y-6">
-            <!-- Informasi Profil -->
+            <!-- Info Profil -->
             <div class="bg-white rounded-xl shadow-lg p-6">
                 <h2 class="text-xl font-bold text-gray-800 mb-6">
                     <i class="fas fa-user-circle mr-2 text-indigo-600"></i>
@@ -166,45 +166,6 @@
                         </button>
                     </div>
                 </form>
-            </div>
-
-            <!-- Foto Profil (Opsional) -->
-            <div class="bg-white rounded-xl shadow-lg p-6">
-                <h2 class="text-xl font-bold text-gray-800 mb-6">
-                    <i class="fas fa-camera mr-2 text-indigo-600"></i>
-                    Foto Profil
-                </h2>
-
-                <div class="flex items-center space-x-6">
-                    <!-- Preview Foto -->
-                    <div class="w-24 h-24 bg-gray-200 rounded-full flex items-center justify-center overflow-hidden">
-                        @if(isset($fotoProfil))
-                            <img src="{{ $fotoProfil }}" alt="Foto Profil" class="w-full h-full object-cover">
-                        @else
-                            <i class="fas fa-user text-4xl text-gray-400"></i>
-                        @endif
-                    </div>
-
-                    <!-- Upload Button -->
-                    <div class="flex-1">
-                        <input type="file" 
-                               wire:model="fotoProfilBaru" 
-                               accept="image/*"
-                               class="hidden" 
-                               id="upload-foto">
-                        <label for="upload-foto" 
-                               class="inline-block bg-indigo-100 hover:bg-indigo-200 text-indigo-700 font-semibold py-3 px-6 rounded-lg cursor-pointer transition-all duration-200">
-                            <i class="fas fa-upload mr-2"></i>
-                            Upload Foto
-                        </label>
-                        <p class="text-xs text-gray-500 mt-2">
-                            Format: JPG, PNG. Maksimal 2MB
-                        </p>
-                        @error('fotoProfilBaru')
-                            <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                        @enderror
-                    </div>
-                </div>
             </div>
         </div>
 

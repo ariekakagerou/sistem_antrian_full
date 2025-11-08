@@ -23,7 +23,7 @@
                     <div class="text-center mb-4">
                         <p class="text-sm text-gray-600 mb-2">Pasien Berikutnya:</p>
                         <div class="text-5xl font-bold text-indigo-600 mb-3">
-                            {{ $antrianBerikutnya['nomor_antrian'] }}
+                            {{ $antrianBerikutnya['nomor_antrian'] ?? 'N/A' }}
                         </div>
                     </div>
                     <div class="space-y-3">
@@ -31,14 +31,14 @@
                             <i class="fas fa-user text-indigo-600"></i>
                             <div>
                                 <p class="text-xs text-gray-500">Nama Pasien</p>
-                                <p class="font-semibold text-gray-800">{{ $antrianBerikutnya['nama_pasien'] }}</p>
+                                <p class="font-semibold text-gray-800">{{ $antrianBerikutnya['nama_pasien'] ?? 'N/A' }}</p>
                             </div>
                         </div>
                         <div class="flex items-center space-x-3">
                             <i class="fas fa-phone text-indigo-600"></i>
                             <div>
                                 <p class="text-xs text-gray-500">Nomor HP</p>
-                                <p class="font-semibold text-gray-800">{{ $antrianBerikutnya['nomor_hp'] }}</p>
+                                <p class="font-semibold text-gray-800">{{ $antrianBerikutnya['nomor_hp'] ?? 'N/A' }}</p>
                             </div>
                         </div>
                         @if(isset($antrianBerikutnya['keluhan']))
@@ -95,18 +95,18 @@
                         </div>
                         <p class="text-sm text-gray-600 mb-2">Nomor Antrian:</p>
                         <div class="text-6xl font-bold text-green-600 mb-4">
-                            {{ $antrianAktif['nomor_antrian'] }}
+                            {{ $antrianAktif['nomor_antrian'] ?? 'N/A' }}
                         </div>
                     </div>
 
                     <div class="space-y-4 bg-white bg-opacity-50 rounded-lg p-4">
                         <div>
                             <p class="text-xs text-gray-500 mb-1">Nama Pasien</p>
-                            <p class="text-xl font-bold text-gray-800">{{ $antrianAktif['nama_pasien'] }}</p>
+                            <p class="text-xl font-bold text-gray-800">{{ $antrianAktif['nama_pasien'] ?? 'N/A' }}</p>
                         </div>
                         <div>
                             <p class="text-xs text-gray-500 mb-1">Nomor HP</p>
-                            <p class="font-semibold text-gray-700">{{ $antrianAktif['nomor_hp'] }}</p>
+                            <p class="font-semibold text-gray-700">{{ $antrianAktif['nomor_hp'] ?? 'N/A' }}</p>
                         </div>
                         @if(isset($antrianAktif['keluhan']))
                             <div>
@@ -125,14 +125,14 @@
                 </div>
 
                 <!-- Tombol Selesai -->
-                <button wire:click="selesaiAntrian({{ $antrianAktif['id'] }})"
+                <button wire:click="selesaiAntrian({{ $antrianAktif['id'] ?? 0 }})"
                         class="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-bold py-4 px-6 rounded-xl transition-all duration-200 transform hover:scale-105 shadow-lg">
                     <i class="fas fa-check-circle mr-2 text-xl"></i>
                     <span class="text-lg">Selesai Pelayanan</span>
                 </button>
 
                 <!-- Tombol Panggil Ulang (Opsional) -->
-                <button wire:click="panggilUlang({{ $antrianAktif['id'] }})"
+                <button wire:click="panggilUlang({{ $antrianAktif['id'] ?? 0 }})"
                         class="w-full mt-3 bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200">
                     <i class="fas fa-redo mr-2"></i>
                     Panggil Ulang

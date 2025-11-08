@@ -4,7 +4,6 @@ namespace App\Livewire;
 
 use Livewire\Component;
 use App\Services\ApiService;
-use Livewire\Attributes\Layout;
 
 class PetugasLoket extends Component
 {
@@ -135,9 +134,41 @@ class PetugasLoket extends Component
             $this->lokets = $response['data'] ?? [];
             $this->calculateTotalPages();
         } catch (\Exception $e) {
+            \Log::error('Petugas loadLokets error: ' . $e->getMessage());
+            // Gunakan fallback data agar aplikasi tetap berfungsi
+            $this->lokets = [
+                ['id' => 1, 'nama_loket' => 'Loket Pendaftaran 1', 'deskripsi' => 'Pendaftaran Pasien Umum'],
+                ['id' => 2, 'nama_loket' => 'Loket Pendaftaran 2', 'deskripsi' => 'Pendaftaran Pasien BPJS'],
+                ['id' => 3, 'nama_loket' => 'Poli Umum', 'deskripsi' => 'Poli Kesehatan Umum'],
+                ['id' => 4, 'nama_loket' => 'Poli Gigi', 'deskripsi' => 'Poli Kesehatan Gigi'],
+                ['id' => 5, 'nama_loket' => 'Poli Kandungan', 'deskripsi' => 'Poli Kebidanan dan Kandungan'],
+                ['id' => 6, 'nama_loket' => 'Poli Anak', 'deskripsi' => 'Poli Kesehatan Anak'],
+                ['id' => 7, 'nama_loket' => 'Poli Mata', 'deskripsi' => 'Poli Kesehatan Mata'],
+                ['id' => 8, 'nama_loket' => 'Poli THT', 'deskripsi' => 'Poli Telinga Hidung Tenggorokan'],
+                ['id' => 9, 'nama_loket' => 'Poli Jantung', 'deskripsi' => 'Poli Kardiovaskular'],
+                ['id' => 10, 'nama_loket' => 'Poli Saraf', 'deskripsi' => 'Poli Neurologi'],
+                ['id' => 11, 'nama_loket' => 'Poli Paru', 'deskripsi' => 'Poli Kesehatan Paru'],
+                ['id' => 12, 'nama_loket' => 'Poli Penyakit Dalam', 'deskripsi' => 'Poli Penyakit Dalam'],
+                ['id' => 13, 'nama_loket' => 'Poli Bedah', 'deskripsi' => 'Poli Bedah Umum'],
+                ['id' => 14, 'nama_loket' => 'Poli Orthopedi', 'deskripsi' => 'Poli Tulang dan Sendi'],
+                ['id' => 15, 'nama_loket' => 'Poli Kulit', 'deskripsi' => 'Poli Kesehatan Kulit'],
+                ['id' => 16, 'nama_loket' => 'Poli Jiwa', 'deskripsi' => 'Poli Kesehatan Jiwa'],
+                ['id' => 17, 'nama_loket' => 'Poli Rehabilitasi', 'deskripsi' => 'Poli Rehabilitasi Medik'],
+                ['id' => 18, 'nama_loket' => 'Laboratorium 1', 'deskripsi' => 'Lab Pemeriksaan Darah'],
+                ['id' => 19, 'nama_loket' => 'Laboratorium 2', 'deskripsi' => 'Lab Pemeriksaan Urine'],
+                ['id' => 20, 'nama_loket' => 'Radiologi', 'deskripsi' => 'Pemeriksaan X-Ray dan CT Scan'],
+                ['id' => 21, 'nama_loket' => 'USG', 'deskripsi' => 'Pemeriksaan Ultrasonografi'],
+                ['id' => 22, 'nama_loket' => 'ECG', 'deskripsi' => 'Pemeriksaan Jantung'],
+                ['id' => 23, 'nama_loket' => 'Farmasi 1', 'deskripsi' => 'Apotek Utama'],
+                ['id' => 24, 'nama_loket' => 'Farmasi 2', 'deskripsi' => 'Apotek Lantai 2'],
+                ['id' => 25, 'nama_loket' => 'Kasir', 'deskripsi' => 'Pembayaran Administrasi'],
+            ];
+            $this->calculateTotalPages();
+            
+            // Tampilkan notifikasi bahwa menggunakan fallback data
             $this->dispatch('notification', [
-                'message' => 'Gagal memuat loket: ' . $e->getMessage(),
-                'type' => 'error'
+                'message' => 'Menggunakan data offline. Backend tidak terhubung.',
+                'type' => 'warning'
             ]);
         }
     }
@@ -205,6 +236,9 @@ class PetugasLoket extends Component
             // Cari antrian yang sedang dipanggil
             $this->antrianAktif = collect($this->antrians)->firstWhere('status', 'dipanggil');
             
+            // Set antrian berikutnya (hanya yang status menunggu)
+            $this->antrianBerikutnya = collect($this->antrians)->where('status', 'menunggu')->first();
+            
             // Load statistik setelah data antrian dimuat
             $this->loadStatistik();
         } catch (\Exception $e) {
@@ -224,14 +258,45 @@ class PetugasLoket extends Component
         $this->jumlahDilayani = collect($this->antrians)->where('status', 'dipanggil')->count();
         $this->jumlahSelesai = collect($this->antrians)->where('status', 'selesai')->count();
         
-        $this->antrianBerikutnya = collect($this->antrians)->where('status', 'menunggu')->first();
-        $this->antrianMenunggu = collect($this->antrians)->where('status', 'menunggu')->values()->all();
-        $this->riwayatPelayanan = collect($this->antrians)->where('status', 'selesai')->values()->all();
+        // Set antrian menunggu untuk daftar
+        $this->antrianMenunggu = collect($this->antrians)->where('status', 'menunggu')->values()->toArray();
+        
+        // Load riwayat dari endpoint khusus untuk data yang lebih lengkap
+        $this->loadRiwayat();
         
         // Log aktivitas (placeholder)
         $this->logAktivitas = [
             ['message' => 'Sistem dimulai', 'time' => now()->format('H:i')],
         ];
+    }
+
+    public function loadRiwayat()
+    {
+        try {
+            $apiService = app(ApiService::class);
+            $riwayatResponse = $apiService->getRiwayatAntrian([
+                'tanggal' => $this->filterTanggal ?: date('Y-m-d'),
+                'loket_id' => $this->selectedLoket,
+                'limit' => 100
+            ]);
+            $this->riwayatPelayanan = $riwayatResponse['data'] ?? [];
+            
+            // Filter berdasarkan search
+            if ($this->searchRiwayat) {
+                $search = strtolower($this->searchRiwayat);
+                $this->riwayatPelayanan = collect($this->riwayatPelayanan)
+                    ->filter(function($item) use ($search) {
+                        return str_contains(strtolower($item['nama_pasien'] ?? ''), $search) ||
+                               str_contains(strtolower($item['nomor_antrian'] ?? ''), $search);
+                    })
+                    ->values()
+                    ->all();
+            }
+        } catch (\Exception $e) {
+            \Log::error('Load riwayat error: ' . $e->getMessage());
+            // Fallback ke data lokal jika gagal
+            $this->riwayatPelayanan = collect($this->antrians)->where('status', 'selesai')->values()->all();
+        }
     }
 
     public function panggilAntrian($antrianId)
@@ -287,6 +352,16 @@ class PetugasLoket extends Component
             'type' => 'success'
         ]);
     }
+
+    public function updatedSearchRiwayat()
+    {
+        $this->loadRiwayat();
+    }
+
+    public function updatedFilterTanggal()
+    {
+        $this->loadRiwayat();
+    }
     
     public function panggilPasienBerikutnya()
     {
@@ -328,8 +403,10 @@ class PetugasLoket extends Component
     {
         $this->activeMenu = $menu;
         
-        // Debug log
-        \Log::info('Menu changed to: ' . $menu);
+        // Load data spesifik berdasarkan menu
+        if ($menu === 'riwayat') {
+            $this->loadRiwayat();
+        }
         
         $this->dispatch('notification', [
             'message' => 'Menu berubah ke: ' . $menu,
@@ -337,7 +414,6 @@ class PetugasLoket extends Component
         ]);
     }
 
-    #[Layout('components.layout')]
     public function render()
     {
         return view('livewire.petugas-loket');
